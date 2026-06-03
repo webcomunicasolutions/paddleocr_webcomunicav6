@@ -5,6 +5,8 @@ FROM paddlepaddle/paddle:3.3.0-gpu-cuda12.6-cudnn9.5
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
+# El CDN "xet" de HuggingFace se cuelga desde este servidor -> forzar descarga HTTPS normal
+ENV HF_HUB_DISABLE_XET=1
 
 # Dependencias de sistema (PDF/imagen) que usa app.py
 RUN apt-get update && apt-get install -y --no-install-recommends \
