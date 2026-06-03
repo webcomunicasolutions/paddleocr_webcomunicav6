@@ -1,0 +1,24 @@
+# Fase 2 — PP-StructureV3 (layout + tablas) en GPU. Referencia para EasyPanel.
+# App desde el repo (carpeta fase2_structurev3). GPU heredada del host. Modelos ~varios GB.
+services:
+  exp-structurev3:
+    build: .
+    container_name: gesfac-exp-structurev3
+    restart: unless-stopped
+    ports:
+      - "9102:8502"          # 9102 host (8505=prod, 9101=Fase1, 9103=Fase3, NO tocar)
+    shm_size: 8g
+    environment:
+      - TZ=Europe/Madrid
+      - FLASK_PORT=8502
+      - HF_HUB_DISABLE_XET=1   # <<< CRÍTICO (pegar A MANO en EasyPanel > Environment)
+      - STRUCT_RENDER_DPI=200
+      - STRUCT_USE_TABLE=true       # reconocimiento de tablas (el objetivo de esta fase)
+      - STRUCT_USE_FORMULA=false    # facturas no tienen fórmulas -> off = más rápido
+      # - STRUCT_REC_MODEL=latin_PP-OCRv5_mobile_rec  # si el español sale mal, probar latino
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8502/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 600s       # 1er arranque descarga modelos de layout/tabla
