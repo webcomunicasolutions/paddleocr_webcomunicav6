@@ -1,0 +1,22 @@
+# --- DATOS DE CLIENTES (RGPD) — NUNCA SUBIR ---
+*.pdf
+*.PDF
+dataset/
+ground_truth/
+resultados/
+facturas*/
+
+# --- CREDENCIALES / SECRETOS ---
+.env
+.env.*
+*.credentials.json
+.credentials.json
+*.key
+*.pem
+
+# --- Ruido ---
+__pycache__/
+*.pyc
+*.bak
+.DS_Store
+_pendiente_borrado/
