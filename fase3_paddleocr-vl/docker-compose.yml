@@ -1,0 +1,28 @@
+# Fase 3 — PaddleOCR-VL (VLM) en GPU. Referencia de variables para EasyPanel.
+# Se despliega como App desde este repo (carpeta fase3_paddleocr-vl). La GPU se hereda
+# del host (default-runtime: nvidia), NO hace falta declararla.
+#
+# ⚠️ VRAM: el modelo usa ~2-3 GB y CONVIVE con ia_ollama en la 4070. El pipeline nativo
+# NO acapara la VRAM (al contrario que vLLM). Aun así, vigilar el total con nvidia-smi.
+# ⚠️ Primer arranque: descarga el modelo de HuggingFace (varios GB). HF_HUB_DISABLE_XET=1
+# es IMPRESCINDIBLE (el CDN xet se cuelga desde este servidor). Puede tardar minutos.
+services:
+  exp-paddleocrvl:
+    build: .
+    container_name: gesfac-exp-paddleocrvl
+    restart: unless-stopped
+    ports:
+      - "9103:8504"          # 9103 en el host (8505=producción, 9101=Fase 1, NO tocar)
+    shm_size: 8g
+    environment:
+      - TZ=Europe/Madrid
+      - FLASK_PORT=8504
+      - HF_HUB_DISABLE_XET=1   # <<< CRÍTICO (pegar A MANO en EasyPanel > Environment)
+      - VL_PIPELINE_VERSION=v1
+      - VL_RENDER_DPI=200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8504/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 600s       # 1er arranque descarga el modelo VL -> margen amplio
