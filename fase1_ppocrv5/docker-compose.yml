@@ -1,0 +1,60 @@
+# Fase 1 — PP-OCRv5 en GPU. Referencia de variables de entorno.
+# En EasyPanel se despliega como App desde este repo (carpeta fase1_ppocrv5) y estas
+# variables se ponen en la pestaña Environment. No hace falta declarar la GPU:
+# el host tiene default-runtime nvidia, así que el contenedor ya ve la RTX 4070.
+services:
+  exp-ppocrv5:
+    build: .
+    container_name: gesfac-exp-ppocrv5
+    restart: unless-stopped
+    ports:
+      - "9101:8503"          # 9101 en el host (8505 es producción, NO tocar)
+    shm_size: 8g
+    environment:
+      - TZ=Europe/Madrid
+      - FLASK_ENV=production
+      - FLASK_PORT=8503
+
+      # >>> GPU <<<
+      - OCR_DEVICE=gpu
+
+      # Variables OCR — PP-OCRv5 (config que ya probaste en el v6)
+      - OCR_LANG=es
+      - OCR_VERSION=PP-OCRv5
+      - OCR_TEXT_DETECTION_MODEL_NAME=PP-OCRv5_mobile_det
+      - OCR_TEXT_RECOGNITION_MODEL_NAME=latin_PP-OCRv5_mobile_rec
+      - OCR_USE_DOC_ORIENTATION=false
+      - OCR_USE_DOC_UNWARPING=false
+      - OCR_USE_TEXTLINE_ORIENTATION=true
+      - OCR_TEXT_DET_THRESH=0.25
+      - OCR_TEXT_DET_BOX_THRESH=0.5
+      - OCR_TEXT_DET_UNCLIP_RATIO=1.75
+      - OCR_TEXT_DET_LIMIT_SIDE_LEN=1216
+      - OCR_TEXT_DET_LIMIT_TYPE=min
+      - OCR_TEXT_RECOGNITION_BATCH_SIZE=6
+      - OCR_ENHANCE_LEVEL=none
+
+      # OpenCV (config Paco, igual que producción)
+      - OPENCV_HSV_LOWER_H=0
+      - OPENCV_HSV_LOWER_S=0
+      - OPENCV_HSV_LOWER_V=140
+      - OPENCV_HSV_UPPER_H=180
+      - OPENCV_HSV_UPPER_S=60
+      - OPENCV_HSV_UPPER_V=255
+      - OPENCV_MIN_AREA_PERCENT=0.15
+      - OPENCV_MAX_AREA_PERCENT=0.95
+      - OPENCV_EPSILON_FACTOR=0.01
+      - OPENCV_ERODE_ITERATIONS=1
+      - OPENCV_DILATE_ITERATIONS=2
+      - OPENCV_MIN_WIDTH=300
+      - OPENCV_MIN_HEIGHT=400
+      - OPENCV_EROSION_PERCENT=0.085
+      - OPENCV_INNER_SCALE_FACTOR=1.06
+      - ROTATION_MIN_CONFIDENCE=0.7
+      - ROTATION_MIN_SKEW_ANGLE=0.2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8503/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 180s     # primer arranque descarga modelos PP-OCRv5
