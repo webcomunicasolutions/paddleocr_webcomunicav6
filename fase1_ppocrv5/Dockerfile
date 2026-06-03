@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED=1
 # Dependencias de sistema (PDF/imagen) que usa app.py
 RUN apt-get update && apt-get install -y --no-install-recommends \
     jq qpdf poppler-utils imagemagick ghostscript pdftk curl bc procps libgomp1 \
+    libgl1 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/* \
     && (sed -i '/<policy domain="coder" rights="none" pattern="PDF"/s/rights="none"/rights="read|write"/' /etc/ImageMagick-6/policy.xml || true)
 
